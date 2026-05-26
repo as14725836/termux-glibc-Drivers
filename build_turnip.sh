@@ -72,4 +72,60 @@ build_lib_for_linux(){
 	cd "$workdir/$srcfolder"
 	echo "==== Building Mesa on Linux ===="
 	
-	# Apply optional patches if EXTRA_PATCH is set. Accepts a single path or a colon-separ
+	# Apply optional patches if EXTRA_PATCH is set
+	if [ -n "$EXTRA_PATCH" ]; then
+		IFS=':' read -ra PATCHES <<< "$EXTRA_PATCH"
+		for PATCH in "${PATCHES[@]}"; do
+			if [ -f "../../$PATCH" ]; then
+				echo "Applying patch: $PATCH"
+				patch -p1 -N --fuzz=4 < "../../$PATCH" || echo -e "${red}Warning: patch failed${nocolor}"
+			fi
+		done
+	fi
+
+	# Setup environment for Linux native build
+	export CC=clang
+	export CXX=clang++
+	export AR=llvm-ar
+	export RANLIB=llvm-ranlib
+	export STRIP=llvm-strip
+
+	echo "Generating build files..."
+	meson setup build-linux \
+		--prefix /usr/local \
+		--libdir lib \
+		-Dbuildtype=release \
+		-Db_ndebug=true \
+		-Dstrip=true \
+		-Dplatforms=x11,wayland \
+		-Dgallium-drivers= \
+		-Dvulkan-drivers=freedreno \
+		-Dvulkan-beta=true \
+		-Dfreedreno-kmds=kgsl \
+		-Degl=disabled \
+		-Dtools=freedreno \
+		--reconfigure
+
+	echo "Compiling build files..."
+	ninja -C build-linux
+
+	if [ ! -f "build-linux/src/freedreno/vulkan/libvulkan_freedreno.so" ]; then
+		echo -e "${red}Build failed!${nocolor}" && exit 1
+	fi
+
+	echo "Making the archive..."
+	cd build-linux/src/freedreno/vulkan
+	
+	local zipname="WN-Turnip-${BUILD_VERSION}-${BUILD_VARIANT}_Linux.zip"
+	zip -q "/tmp/${zipname}" libvulkan_freedreno.so
+	cd - > /dev/null
+
+	if [ ! -f "/tmp/${zipname}" ]; then
+		echo -e "${red}Failed to pack the archive!${nocolor}"
+	else
+		cp "/tmp/${zipname}" "$workdir/"
+		echo -e "${green}Build completed! Output: ${zipname}${nocolor}"
+	fi
+}
+
+run_all
