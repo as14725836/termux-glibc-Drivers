@@ -3,7 +3,7 @@
 green='\033[0;32m'
 red='\033[0;31m'
 nocolor='\033[0m'
-deps="git meson ninja patchelf unzip curl flex bison zip glslang-tools pkg-config"
+deps="git meson ninja patchelf unzip curl flex bison zip pkg-config"
 workdir="$(pwd)/turnip_workdir"
 mesasrc="https://gitlab.freedesktop.org/mesa/mesa"
 srcfolder="mesa"
