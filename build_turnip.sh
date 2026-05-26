@@ -115,7 +115,7 @@ build_lib_for_linux(){
 	echo "Making the archive..."
 	cd build-linux/src/freedreno/vulkan
 	
-	local zipname="WN-Turnip-${BUILD_VERSION}-${BUILD_VARIANT}_Linux.zip"
+	local zipname="WN-Turnip-${BUILD_VERSION}-${BUILD_VARIANT}_Axxx.zip"
 	zip -q "/tmp/${zipname}" libvulkan_freedreno.so
 	cd - > /dev/null
 
