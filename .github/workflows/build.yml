@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 45
     permissions:
       contents: read
@@ -108,24 +108,13 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             ninja-build patchelf unzip curl python3-pip flex bison zip \
-            glslang-tools ccache
-          # Mesa main requires meson >= 1.4; Ubuntu 24.04 apt only ships 1.3.2.
+            glslang-tools ccache clang llvm
           sudo python3 -m pip install --quiet --break-system-packages "meson>=1.4" mako
           meson --version
-
-      - name: Set up Android NDK r26d
-        id: ndk
-        # nttld/setup-ndk v1.5.0
-        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410
-        with:
-          ndk-version: r26d
-          add-to-path: false
-          local-cache: true
 
       - name: Build -b and -p variants
         env:
           BUILD_VERSION: ${{ steps.ver.outputs.build_version }}
-          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
         run: ./build_wn_turnip.sh
 
       - name: Verify output zips exist
@@ -146,7 +135,7 @@ jobs:
   release:
     needs: build
     if: github.event_name == 'workflow_dispatch' && needs.build.outputs.release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     permissions:
       contents: write
     steps:
@@ -156,7 +145,6 @@ jobs:
           name: WN-Turnip-${{ needs.build.outputs.build_version }}
 
       - name: Create GitHub Release
-        # softprops/action-gh-release v2.0.8
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191
         with:
           tag_name: ${{ needs.build.outputs.tag_name }}
