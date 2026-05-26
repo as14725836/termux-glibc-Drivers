@@ -86,7 +86,6 @@ build_lib_for_linux(){
 	# Setup environment for Linux native build
 	export CC=clang
 	export CXX=clang++
-	export AR=llvm-ar
 	export RANLIB=llvm-ranlib
 	export STRIP=llvm-strip
 
