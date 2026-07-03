@@ -91,19 +91,40 @@ build_lib_for_linux(){
 
 	echo "Generating build files..."
 	meson setup build-linux \
-		--prefix /usr/local \
-		--libdir lib \
-		-Dbuildtype=release \
-		-Db_ndebug=true \
-		-Dstrip=true \
-		-Dplatforms=x11,wayland \
-		-Dgallium-drivers= \
-		-Dvulkan-drivers=freedreno \
-		-Dvulkan-beta=true \
-		-Dfreedreno-kmds=kgsl \
-		-Degl=disabled \
-		-Dtools=freedreno \
-		--reconfigure
+            --libdir=lib \
+            --prefix /usr/local \
+            -Dbuildtype=release \
+            -Dplatforms=x11 \
+            -Degl-native-platform=x11 \
+            -Dglx=dri \
+            -Dglx-direct=true \
+            -Dopengl=true \
+            -Dgles1=enabled \
+            -Dgles2=enabled \
+            -Dglvnd=disabled \
+            -Degl=enabled \
+            -Dllvm=disabled \
+            -Dshared-llvm=enabled \
+            -Dshader-cache=enabled \
+            -Dshared-glapi=enabled \
+            -Dxlib-lease=enabled \
+            -Dvulkan-beta=true \
+            -Dlibunwind=disabled \
+            -Dvalgrind=disabled \
+            -Dmicrosoft-clc=disabled \
+            -Dgallium-rusticl=false \
+            -Dgallium-extra-hud=true \
+            -Dgallium-drivers=zink,freedreno,virgl,softpipe \
+            -Dgallium-rusticl-enable-drivers=freedreno \
+            -Dshader-cache-default=true \
+            -Dvulkan-drivers=freedreno,swrast,virtio \
+            -Dfreedreno-kmds=kgsl \
+            -Dvulkan-layers=anti-lag \
+            -Dvideo-codecs=all \
+            -Dgbm=enabled \
+            -Db_ndebug=true \
+            -Dstrip=true \
+		    --reconfigure
 
 	echo "Compiling build files..."
 	ninja -C build-linux
